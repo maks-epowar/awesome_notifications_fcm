@@ -46,6 +46,7 @@ public class AwesomeNotificationsFcm:
     private var originalDelegateHasUnsubscribe = false
 
     private var isInitialized:Bool = false
+    public static weak var interceptorDelegate: AwesomeFcmInterceptorDelegate?
 
     private static func checkGooglePlayServices() -> Bool {
         return true
@@ -169,6 +170,9 @@ public class AwesomeNotificationsFcm:
         didReceiveRemoteNotification userInfo: [AnyHashable : Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) -> Bool {
+        if let interceptorDelegate = AwesomeNotificationsFcm.interceptorDelegate, interceptorDelegate.handleRemoteNotification(userInfo: userInfo, fetchCompletionHandler: completionHandler) {
+            return true
+        }
         return AwesomeFcmService()
             .didReceiveRemoteNotification(
                 userInfo: userInfo,
@@ -284,3 +288,6 @@ public class AwesomeNotificationsFcm:
     }
 }
 
+public protocol AwesomeFcmInterceptorDelegate: AnyObject {
+    func handleRemoteNotification(userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) -> Bool
+}
